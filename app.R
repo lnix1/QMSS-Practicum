@@ -13,9 +13,13 @@ CFPB <- read.csv(file.choose())
 library(lubridate)
 CFPB$Date.received <- mdy(CFPB$Date.received)
 
-View(FDIC$Date.received)
+View(CFPB$Date.received)
 
 ui <- fluidPage(    
+  tags$style(type="text/css",
+             ".shiny-output-error { visibility: hidden; }",
+             ".shiny-output-error:before { visibility: hidden; }"
+  ),
   
   # Give the page a title
   titlePanel("Urgency of Complaints over Time"),
@@ -27,11 +31,11 @@ ui <- fluidPage(
     sidebarPanel(
       pickerInput(inputId="product", label="Product Category:", 
                   choices=sort(as.character(unique(CFPB$Product))), options = list(`actions-box` = TRUE),
-                  multiple = TRUE),
+                  multiple = TRUE, selected = "Mortgage"),
       
       pickerInput(inputId="company", label="Company:", 
                   choices=sort(as.character(unique(CFPB$Company))),  options = list(`actions-box` = TRUE),
-                  multiple = TRUE),
+                  multiple = TRUE, selected = "FLAGSTAR BANK, FSB"),
       
       dateRangeInput('dateRange2',
                      label = "Choose a start and end date:",
@@ -40,11 +44,11 @@ ui <- fluidPage(
                      separator = " - ", format = "dd/mm/yyyy",
                      startview = 'year', language = 'en', weekstart = 7
       ),
-
+      
       hr(),
-
+      
       helpText("Data from CFPB.")
-    ),
+    ), 
     
     # Create a spot for the barplot
     mainPanel(
@@ -96,11 +100,10 @@ server <- shinyServer(function(input, output) {
       xlab("Date of Complaint") + 
       ylab("Urgency Level") +
       scale_y_continuous(labels=function(label) sprintf('%15.2f', label))
-      # scale_x_continuous(labels=function(label) sprintf('%15.2f', label))
+    # scale_x_continuous(labels=function(label) sprintf('%15.2f', label))
     
   })
 })
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
