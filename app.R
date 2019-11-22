@@ -29,13 +29,13 @@ ui <- fluidPage(
     
     # Define the sidebar with one input
     sidebarPanel(
-      pickerInput(inputId="product", label="Product Category:", 
-                  choices=sort(as.character(unique(CFPB$Product))), options = list(`actions-box` = TRUE),
-                  multiple = TRUE, selected = "Mortgage"),
+      selectInput(inputId="product", label="Product Category:", 
+                  choices=c("All", sort(as.character(unique(CFPB$Product)))),
+                  multiple = TRUE, selected = "All"),
       
-      pickerInput(inputId="company", label="Company:", 
-                  choices=sort(as.character(unique(CFPB$Company))),  options = list(`actions-box` = TRUE),
-                  multiple = TRUE, selected = "FLAGSTAR BANK, FSB"),
+      selectInput(inputId="company", label="Company:", 
+                  choices=c("All", sort(as.character(unique(CFPB$Company)))), 
+                  multiple = TRUE, selected = "All"),
       
       dateRangeInput('dateRange2',
                      label = "Choose a start and end date:",
@@ -72,7 +72,8 @@ server <- shinyServer(function(input, output) {
     # Dynamically filter for the company and product input by the user, then select for dates,
     # and generate a count of the occurrences for each date
     df <- CFPB %>%
-      filter(Company == input$company, Product == input$product) %>%
+      filter(if (input$company != "All") Company == input$company else TRUE,
+             if (input$product != "All") Product == input$product else TRUE) %>%
       select("Date.received")%>%
       count(c("Date.received"))
   })
